@@ -2,7 +2,7 @@ import os
 import importlib
 import yaml
 import uuid
-from openai import OpenAI
+from openai import AzureOpenAI
 from enum import Enum
 from typing import List, Optional, Dict, Any, Literal, Union
 from pydantic import BaseModel
@@ -17,9 +17,11 @@ class ExtractProperty(BaseModel):
     required: bool = True
 
 
-class OpenAIConfig(BaseModel):
+class AzureOpenAIConfig(BaseModel):
     api_key: str
-    base_url: Optional[str] = None
+    api_version: Optional[str] = None
+    azure_deployment: Optional[str] = None
+    azure_endpoint: Optional[str] = None
 
 
 class DoctranConfig(BaseModel):
@@ -235,21 +237,29 @@ class Doctran:
         )
 
         if openai_api_key:
-            openai_config = OpenAIConfig(api_key=openai_api_key)
-        elif os.environ.get("OPENAI_API_KEY"):
-            openai_config = OpenAIConfig(api_key=os.environ["OPENAI_API_KEY"])
+            openai_config = AzureOpenAIConfig(api_key=openai_api_key)
+        elif os.environ.get("AZURE_OPENAI_API_KEY"):
+            openai_config = AzureOpenAIConfig(
+                api_key=os.environ["AZURE_OPENAI_API_KEY"]
+            )
         else:
             raise Exception("No OpenAI API Key provided")
 
         if openai_deployment_id:
             self.config.openai_deployment_id = openai_deployment_id
-        elif os.environ.get("OPENAI_DEPLOYMENT_ID"):
-            self.config.openai_deployment_id = os.environ["OPENAI_DEPLOYMENT_ID"]
+        elif os.environ.get("OPENAI_API_DEPLOYMENT"):
+            self.config.openai_deployment_id = os.environ["OPENAI_API_DEPLOYMENT"]
 
-        if os.environ.get("OPENAI_API_BASE"):
-            openai_config.base_url = os.environ["OPENAI_API_BASE"]
+        if os.environ.get("AZURE_OPENAI_API_VERSION"):
+            openai_config.api_version = os.environ["AZURE_OPENAI_API_VERSION"]
 
-        self.config.openai = OpenAI(**openai_config.model_dump())
+        if os.environ.get("AZURE_OPENAI_API_DEPLOYMENT"):
+            openai_config.azure_deployment = os.environ["AZURE_OPENAI_API_DEPLOYMENT"]
+
+        if os.environ.get("AZURE_OPENAI_API_BASE"):
+            openai_config.azure_endpoint = os.environ["AZURE_OPENAI_API_BASE"]
+
+        self.config.openai = AzureOpenAI(**openai_config.model_dump())
 
     def parse(
         self,
