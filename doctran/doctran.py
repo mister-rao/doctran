@@ -23,7 +23,7 @@ class OpenAIConfig(BaseModel):
 
 
 class DoctranConfig(BaseModel):
-    openai_deployment_id: Optional[str]
+    openai_deployment_id: Optional[str] = None
     openai_model: str
     openai: Any
     openai_token_limit: int
@@ -249,7 +249,7 @@ class Doctran:
         if os.environ.get("OPENAI_API_BASE"):
             openai_config.base_url = os.environ["OPENAI_API_BASE"]
 
-        self.config.openai = OpenAI(**openai_config.dict())
+        self.config.openai = OpenAI(**openai_config.model_dump())
 
     def parse(
         self,
