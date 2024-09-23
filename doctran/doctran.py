@@ -12,14 +12,14 @@ class ExtractProperty(BaseModel):
     name: str
     description: str
     type: Literal["string", "number", "boolean", "array", "object"]
-    items: Optional[Union[List, Dict[str, Any]]]
-    enum: Optional[List[str]]
+    items: Optional[Union[List, Dict[str, Any]]] = None
+    enum: Optional[List[str]] = None
     required: bool = True
 
 
 class OpenAIConfig(BaseModel):
     api_key: str
-    base_url: Optional[str]
+    base_url: Optional[str] = None
 
 
 class DoctranConfig(BaseModel):
